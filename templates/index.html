@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET Diagram Intelligence Agent - AI-Powered Diagram Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">📊</span>
+                <span class="logo-text">NEET Diagram AI</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="/" class="nav-link active">Analyze</a></li>
+                <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+                <li><a href="/history" class="nav-link">History</a></li>
+            </ul>
+            <div class="theme-toggle">
+                <button id="themeToggle" class="theme-btn">🌙</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">NEET Diagram Intelligence Agent</h1>
+                <p class="hero-subtitle">Upload diagrams, get AI-powered analysis with questions, flashcards & revision notes</p>
+            </div>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section">
+            <div class="card upload-card">
+                <h2 class="section-title">Upload Your Diagram</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <p class="upload-text">Drag and drop your diagram here or click to select</p>
+                    <p class="upload-hint">Supported: PNG, JPG, JPEG, WEBP (Max 16MB)</p>
+                    <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp" hidden>
+                </div>
+
+                <div id="supportedDiagrams" class="supported-diagrams">
+                    <h3>Supported NEET Diagrams</h3>
+                    <div class="diagram-tags">
+                        <span class="tag">Heart</span>
+                        <span class="tag">Nephron</span>
+                        <span class="tag">Human Eye</span>
+                        <span class="tag">Brain</span>
+                        <span class="tag">Flower</span>
+                        <span class="tag">Cell</span>
+                        <span class="tag">Ray Diagrams</span>
+                        <span class="tag">Electric Circuits</span>
+                        <span class="tag">+ More</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Result Section (Hidden by default) -->
+        <section id="analysisSection" class="analysis-section" style="display: none;">
+            <div class="card analysis-card">
+                <div class="analysis-header">
+                    <h2 id="diagramName" class="analysis-title">Diagram Name</h2>
+                    <div class="analysis-meta">
+                        <span class="meta-badge" id="subjectBadge">Subject</span>
+                        <span class="meta-badge" id="chapterBadge">Chapter</span>
+                    </div>
+                </div>
+
+                <!-- Image and Quick Info -->
+                <div class="analysis-top">
+                    <div class="diagram-image">
+                        <img id="uploadedImage" src="" alt="Uploaded diagram">
+                    </div>
+                    <div class="quick-info">
+                        <div class="info-box">
+                            <h3>Quick Revision</h3>
+                            <p id="quickRevision">Loading...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="components">Components</button>
+                        <button class="tab-btn" data-tab="confusion">Confusion Points</button>
+                        <button class="tab-btn" data-tab="hyp">High Yield Points</button>
+                        <button class="tab-btn" data-tab="mcq">MCQ Questions</button>
+                        <button class="tab-btn" data-tab="assertion">Assertion-Reason</button>
+                        <button class="tab-btn" data-tab="match">Match Following</button>
+                        <button class="tab-btn" data-tab="oneword">One-Word Questions</button>
+                        <button class="tab-btn" data-tab="flashcard">Flashcards</button>
+                    </div>
+
+                    <!-- Components Tab -->
+                    <div class="tab-content active" id="components-tab">
+                        <div id="componentsList" class="components-list">
+                            <!-- Components will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Confusion Points Tab -->
+                    <div class="tab-content" id="confusion-tab">
+                        <div id="confusionList" class="confusion-list">
+                            <!-- Confusion points will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- High Yield Points Tab -->
+                    <div class="tab-content" id="hyp-tab">
+                        <div id="hypList" class="hyp-list">
+                            <!-- High yield points will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- MCQ Questions Tab -->
+                    <div class="tab-content" id="mcq-tab">
+                        <div id="mcqList" class="questions-list">
+                            <!-- MCQ questions will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Assertion-Reason Tab -->
+                    <div class="tab-content" id="assertion-tab">
+                        <div id="assertionList" class="questions-list">
+                            <!-- Assertion-reason questions will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Match Following Tab -->
+                    <div class="tab-content" id="match-tab">
+                        <div id="matchList" class="questions-list">
+                            <!-- Match following questions will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- One-Word Questions Tab -->
+                    <div class="tab-content" id="oneword-tab">
+                        <div id="onewordList" class="questions-list">
+                            <!-- One-word questions will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Flashcards Tab -->
+                    <div class="tab-content" id="flashcard-tab">
+                        <div id="flashcardList" class="flashcard-list">
+                            <!-- Flashcards will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export and Actions -->
+                <div class="analysis-actions">
+                    <button class="btn btn-primary" id="exportPdfBtn">📥 Export as PDF</button>
+                    <button class="btn btn-secondary" id="newAnalysisBtn">🔄 Analyze Another</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="loader"></div>
+            <p>Analyzing your diagram with AI...</p>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="errorAlert" class="error-alert" style="display: none;">
+            <span id="errorMessage"></span>
+            <button class="close-btn" onclick="closeError()">×</button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 NEET Diagram Intelligence Agent. Powered by AI.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
