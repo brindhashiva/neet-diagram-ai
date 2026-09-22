@@ -10,17 +10,64 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-icon">📊</span>
-                <span class="logo-text">NEET Diagram AI</span>
-            </div>
+            <a href="/" class="nav-logo">
+                <span class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="none">
+                        <path d="M24 4L12 12V36C12 39.3137 14.6863 42 18 42H30C33.3137 42 36 39.3137 36 36V12L24 4Z" fill="#2563eb"/>
+                        <path d="M18 18L24 12L30 18V36C30 37.1046 29.1046 38 28 38H20C18.8954 38 18 37.1046 18 36V18Z" fill="white" opacity="0.3"/>
+                        <path d="M21 24H27M21 30H27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </span>
+                <span class="logo-text">Kactii</span>
+            </a>
             <ul class="nav-menu">
-                <li><a href="/" class="nav-link">Analyze</a></li>
-                <li><a href="/dashboard" class="nav-link active">Dashboard</a></li>
-                <li><a href="/history" class="nav-link">History</a></li>
+                <li><a href="/" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Analyze
+                </a></li>
+                <li><a href="/dashboard" class="nav-link active">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Dashboard
+                </a></li>
+                <li><a href="/history" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    History
+                </a></li>
             </ul>
-            <div class="theme-toggle">
-                <button id="themeToggle" class="theme-btn">🌙</button>
+            <div class="nav-right">
+                <div class="theme-toggle">
+                    <button id="themeToggle" class="theme-btn"></button>
+                </div>
+                <div class="nav-profile">
+                    <button class="profile-avatar" id="profileBtn" title="Profile">
+                        <span id="userInitial">U</span>
+                    </button>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <div class="dropdown-header">
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-avatar" id="dropdownAvatar">U</div>
+                                <div class="dropdown-user-details">
+                                    <div class="dropdown-name" id="dropdownName">User</div>
+                                    <div class="dropdown-email" id="dropdownEmail">user@example.com</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item" id="profileLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Profile
+                        </a>
+                        <a href="#" class="dropdown-item" id="settingsLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-16.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24"></path></svg>
+                            Account Settings
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-logout" id="logoutLink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            Logout
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -30,13 +77,15 @@
         <!-- Page Header -->
         <div class="page-header">
             <h1>Dashboard</h1>
-            <p>Your NEET diagram analysis statistics and recent uploads</p>
+            <p>Your NEET diagram analysis statistics and recent activity</p>
         </div>
 
         <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-icon">📊</div>
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                </div>
                 <div class="stat-content">
                     <h3>Total Diagrams</h3>
                     <p class="stat-number">{{ total_diagrams }}</p>
@@ -44,7 +93,9 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">🔬</div>
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
                 <div class="stat-content">
                     <h3>Biology Diagrams</h3>
                     <p class="stat-number">{{ biology_count }}</p>
@@ -52,7 +103,9 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">⚡</div>
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                </div>
                 <div class="stat-content">
                     <h3>Physics Diagrams</h3>
                     <p class="stat-number">{{ physics_count }}</p>
@@ -60,7 +113,9 @@
             </div>
 
             <div class="stat-card">
-                <div class="stat-icon">❓</div>
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11"></path></svg>
+                </div>
                 <div class="stat-content">
                     <h3>Questions Generated</h3>
                     <p class="stat-number">{{ questions_generated * 30 }}</p>
@@ -84,14 +139,22 @@
                                 <p class="recent-meta">Chapter: {{ diagram.chapter }}</p>
                                 <p class="recent-date">{{ diagram.uploaded_at }}</p>
                                 <div class="recent-actions">
-                                    <a href="/history#diagram-{{ diagram.id }}" class="btn btn-sm btn-primary">View Details</a>
+                                    <a href="/history#diagram-{{ diagram.id }}" class="btn btn-sm btn-primary">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        View Details
+                                    </a>
                                 </div>
                             </div>
                         {% endfor %}
                     </div>
                 {% else %}
                     <div class="empty-state">
-                        <p>No diagrams uploaded yet. Start by <a href="/">uploading a diagram</a>.</p>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--spacing-lg); opacity: 0.5;">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M8 12h8M12 8v8"></path>
+                        </svg>
+                        <p>No diagrams uploaded yet</p>
+                        <p style="font-size: var(--font-size-sm); color: var(--text-light-tertiary); margin-bottom: var(--spacing-lg);">Start by <a href="/">uploading a diagram</a> to view analysis</p>
                     </div>
                 {% endif %}
             </div>
@@ -103,19 +166,19 @@
                 <h2 class="section-title">Quick Statistics</h2>
                 <div class="stats-table">
                     <div class="stats-row">
-                        <span class="stats-label">Average Components per Diagram:</span>
+                        <span class="stats-label">Average Components per Diagram</span>
                         <span class="stats-value">8-12</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Questions per Diagram:</span>
+                        <span class="stats-label">Questions per Diagram</span>
                         <span class="stats-value">30</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">Supported Subjects:</span>
+                        <span class="stats-label">Supported Subjects</span>
                         <span class="stats-value">Biology, Physics</span>
                     </div>
                     <div class="stats-row">
-                        <span class="stats-label">AI Model:</span>
+                        <span class="stats-label">AI Model</span>
                         <span class="stats-value">Google Gemini</span>
                     </div>
                 </div>
@@ -125,9 +188,10 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2024 NEET Diagram Intelligence Agent. Powered by AI.</p>
+        <p>&copy; 2024 Kactii. AI-Powered NEET Preparation.</p>
     </footer>
 
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 </body>
 </html>

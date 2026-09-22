@@ -807,3 +807,26 @@ if __name__ == '__main__':
     
     # Run app
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+@app.route('/api/user')
+@login_required
+def get_user_profile():
+    """Get current user profile"""
+    try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'success': False, 'error': 'Not authenticated'}), 401
+        
+        return jsonify({
+            'success': True,
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'email': user['email'],
+                'full_name': user['full_name'],
+                'created_at': user['created_at'],
+                'updated_at': user['updated_at']
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

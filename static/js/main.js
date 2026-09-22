@@ -430,6 +430,42 @@ function closeError() {
     hideError();
 }
 
+function showSuccess(message) {
+    const successAlert = document.getElementById('successAlert');
+    const successMessage = document.getElementById('successMessage');
+    if (successMessage && successAlert) {
+        successMessage.textContent = message;
+        successAlert.style.display = 'flex';
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            successAlert.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function closeSuccess() {
+    const successAlert = document.getElementById('successAlert');
+    if (successAlert) {
+        successAlert.style.display = 'none';
+    }
+}
+
+function showInfo(message) {
+    const infoAlert = document.getElementById('infoAlert');
+    const infoMessage = document.getElementById('infoMessage');
+    if (infoMessage && infoAlert) {
+        infoMessage.textContent = message;
+        infoAlert.style.display = 'flex';
+    }
+}
+
+function closeInfo() {
+    const infoAlert = document.getElementById('infoAlert');
+    if (infoAlert) {
+        infoAlert.style.display = 'none';
+    }
+}
+
 // Setup theme
 function setupTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';

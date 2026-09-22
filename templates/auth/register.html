@@ -3,115 +3,270 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - NEET Diagram AI</title>
+    <title>Create Account - NEET Diagram AI</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-        .register-card {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        [data-theme="dark"] body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .auth-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+        }
+        .auth-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             padding: 40px;
         }
-        .logo { text-align: center; margin-bottom: 30px; }
-        .logo h1 { color: #333; margin-bottom: 10px; }
-        .logo p { color: #999; font-size: 14px; }
+        [data-theme="dark"] .auth-card {
+            background: #1e293b;
+            border-color: #475569;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            text-decoration: none;
+        }
+        .logo-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            border-radius: 8px;
+            color: white;
+        }
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2563eb;
+            letter-spacing: -0.02em;
+        }
+        [data-theme="dark"] .logo-text {
+            color: #60a5fa;
+        }
+        .auth-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            text-align: center;
+        }
+        [data-theme="dark"] .auth-subtitle {
+            color: #cbd5e1;
+        }
         .form-group {
             margin-bottom: 20px;
         }
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+            color: #1e293b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        [data-theme="dark"] label {
+            color: #f1f5f9;
         }
         input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 14px;
+            background-color: white;
+            color: #1e293b;
+            transition: all 200ms ease-out;
+        }
+        [data-theme="dark"] input {
+            background-color: #0f172a;
+            border-color: #475569;
+            color: #f1f5f9;
         }
         input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102,126,234,0.2);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        input::placeholder {
+            color: #94a3b8;
+        }
+        [data-theme="dark"] input::placeholder {
+            color: #64748b;
         }
         button {
             width: 100%;
-            padding: 12px;
-            background: #667eea;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            font-size: 14px;
+            transition: all 200ms ease-out;
             margin-bottom: 15px;
         }
-        button:hover { background: #5568d3; }
-        .divider { text-align: center; color: #999; margin: 20px 0; }
-        .login-link {
+        button:hover {
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .divider {
             text-align: center;
+            color: #94a3b8;
+            margin: 25px 0;
+            font-size: 14px;
         }
-        .login-link a {
-            color: #667eea;
-            text-decoration: none;
+        [data-theme="dark"] .divider {
+            color: #64748b;
+        }
+        .auth-footer {
+            text-align: center;
+            font-size: 14px;
+        }
+        .auth-footer a {
+            color: #2563eb;
             font-weight: 600;
+            text-decoration: none;
+            transition: color 200ms ease-out;
         }
-        .error { color: #e74c3c; margin-bottom: 15px; }
+        .auth-footer a:hover {
+            color: #1e40af;
+        }
+        [data-theme="dark"] .auth-footer a {
+            color: #60a5fa;
+        }
+        [data-theme="dark"] .auth-footer a:hover {
+            color: #93c5fd;
+        }
+        .error {
+            color: #dc2626;
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            font-size: 14px;
+            animation: slideIn 300ms ease-out;
+        }
+        [data-theme="dark"] .error {
+            color: #fecaca;
+            background-color: #7f1d1d;
+            border-color: #991b1b;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media (max-width: 480px) {
+            .auth-card {
+                padding: 30px 20px;
+            }
+            .auth-header {
+                margin-bottom: 25px;
+            }
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+            }
+            .logo-text {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="register-card">
-        <div class="logo">
-            <h1>🧬 NEET Diagram AI</h1>
-            <p>Create Your Account</p>
-        </div>
-        
-        <form id="registerForm">
-            <div id="error" class="error" style="display:none;"></div>
-            
-            <div class="form-group">
-                <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="/" class="auth-logo">
+                    <span class="logo-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" fill="none">
+                            <path d="M24 4L12 12V36C12 39.3137 14.6863 42 18 42H30C33.3137 42 36 39.3137 36 36V12L24 4Z" fill="#2563eb"/>
+                            <path d="M18 18L24 12L30 18V36C30 37.1046 29.1046 38 28 38H20C18.8954 38 18 37.1046 18 36V18Z" fill="white" opacity="0.3"/>
+                            <path d="M21 24H27M21 30H27" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <span class="logo-text">Kactii</span>
+                </a>
+                <p class="auth-subtitle">Create your account</p>
             </div>
             
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required placeholder="Enter your email">
-            </div>
+            <form id="registerForm">
+                <div id="error" class="error" style="display:none;"></div>
+                
+                <div class="form-group">
+                    <label for="full_name">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" required placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Choose a username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter a strong password">
+                </div>
+                
+                <button type="submit">Create Account</button>
+            </form>
             
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required placeholder="Choose a username (3+ chars)">
-            </div>
+            <div class="divider">Already have an account?</div>
             
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required placeholder="Enter password (8+ chars)">
+            <div class="auth-footer">
+                <a href="{{ url_for('login') }}">Sign in instead</a>
             </div>
-            
-            <button type="submit">Create Account</button>
-        </form>
-        
-        <div class="divider">Already have an account?</div>
-        
-        <div class="login-link">
-            <a href="{{ url_for('login') }}">Sign in instead</a>
         </div>
     </div>
 
     <script>
+        // Theme support
+        const htmlElement = document.documentElement;
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-theme', savedTheme);
+        }
+        initTheme();
+
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = {
@@ -137,7 +292,7 @@
                     errorDiv.style.display = 'block';
                 }
             } catch (error) {
-                errorDiv.textContent = 'An error occurred';
+                errorDiv.textContent = 'An error occurred. Please try again.';
                 errorDiv.style.display = 'block';
             }
         });
