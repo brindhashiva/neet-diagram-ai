@@ -1,9 +1,12 @@
 import os
 import json
 import sqlite3
-from datetime import datetime
-from flask import Flask, render_template, request, jsonify, send_file
+import os
+from datetime import datetime, timedelta
+from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for, session
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import google.generativeai as genai
 from PIL import Image
 import io
@@ -13,26 +16,32 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 import base64
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['SECRET_KEY'] = 'your-secret-key-change-in-production'
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 # Create uploads folder if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize Generative AI
-api_key = os.environ.get('GOOGLE_API_KEY', '')
-if api_key and 'GOOGLE_API_KEY' not in api_key and api_key.strip():
+api_key = os.environ.get('GOOGLE_API_KEY')
+if api_key:
     try:
         genai.configure(api_key=api_key)
         print(f"✓ Google Generative AI configured successfully")
     except Exception as e:
         print(f"⚠ Warning: Failed to configure Google Generative AI: {e}")
 else:
-    print("⚠ Warning: GOOGLE_API_KEY not set or invalid. AI features may not work.")
+    print("⚠ Warning: GOOGLE_API_KEY environment variable not found. Please check your .env file.")
 
 # Database setup
 DATABASE = 'database.db'
@@ -48,9 +57,20 @@ def init_db():
     conn = get_db()
     c = conn.cursor()
     
+    # Users table
+    c.execute('''CREATE TABLE IF NOT EXISTS users
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  username TEXT UNIQUE NOT NULL,
+                  email TEXT UNIQUE NOT NULL,
+                  password_hash TEXT NOT NULL,
+                  full_name TEXT,
+                  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+    
     # Diagrams table
     c.execute('''CREATE TABLE IF NOT EXISTS diagrams
                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  user_id INTEGER NOT NULL,
                   filename TEXT NOT NULL,
                   diagram_name TEXT,
                   subject TEXT,
@@ -65,7 +85,8 @@ def init_db():
                   high_yield_points TEXT,
                   revision_summary TEXT,
                   flashcards TEXT,
-                  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+                  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)''')
     
     conn.commit()
     conn.close()
@@ -309,30 +330,148 @@ Return this exact JSON structure (and ONLY this JSON, no other text):
             "one_word_questions": []
         }
 
+# Authentication Helper Functions
+def get_current_user():
+    """Get current user from session"""
+    if 'user_id' in session:
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT * FROM users WHERE id = ?', (session['user_id'],))
+        user = c.fetchone()
+        conn.close()
+        return dict(user) if user else None
+    return None
+
+def login_required(f):
+    """Decorator to require login"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            if request.path.startswith('/api'):
+                return jsonify({'error': 'Authentication required'}), 401
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Authentication Routes
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """User login"""
+    if request.method == 'GET':
+        return render_template('auth/login.html')
+    
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username or not password:
+            return jsonify({'error': 'Username and password required'}), 400
+        
+        conn = get_db()
+        c = conn.cursor()
+        c.execute('SELECT * FROM users WHERE username = ?', (username,))
+        user = c.fetchone()
+        conn.close()
+        
+        if user and check_password_hash(user['password_hash'], password):
+            session['user_id'] = user['id']
+            session.permanent = True
+            return jsonify({'success': True, 'redirect': '/dashboard'})
+        
+        return jsonify({'error': 'Invalid username or password'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """User registration"""
+    if request.method == 'GET':
+        return render_template('auth/register.html')
+    
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+        full_name = data.get('full_name')
+        
+        if not all([username, email, password, full_name]):
+            return jsonify({'error': 'All fields required'}), 400
+        
+        if len(username) < 3:
+            return jsonify({'error': 'Username must be at least 3 characters'}), 400
+        
+        conn = get_db()
+        c = conn.cursor()
+        
+        try:
+            c.execute('''INSERT INTO users (username, email, password_hash, full_name)
+                        VALUES (?, ?, ?, ?)''',
+                     (username, email, generate_password_hash(password), full_name))
+            conn.commit()
+            user_id = c.lastrowid
+            conn.close()
+            
+            session['user_id'] = user_id
+            session.permanent = True
+            return jsonify({'success': True, 'redirect': '/dashboard'})
+        except sqlite3.IntegrityError:
+            conn.close()
+            return jsonify({'error': 'Username or email already exists'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/logout')
+def logout():
+    """User logout"""
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/api/auth/user')
+def get_user_info():
+    """Get current user info"""
+    user = get_current_user()
+    if user:
+        return jsonify({
+            'user': {
+                'id': user['id'],
+                'username': user['username'],
+                'full_name': user['full_name'],
+                'email': user['email']
+            }
+        })
+    return jsonify({}), 401
+
 @app.route('/')
 def index():
     """Home page"""
     return render_template('index.html')
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
     """Dashboard page"""
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
     conn = get_db()
     c = conn.cursor()
     
-    c.execute('SELECT COUNT(*) as total FROM diagrams')
+    c.execute('SELECT COUNT(*) as total FROM diagrams WHERE user_id = ?', (user['id'],))
     total = c.fetchone()['total']
     
-    c.execute("SELECT COUNT(*) as count FROM diagrams WHERE subject = 'Biology'")
+    c.execute("SELECT COUNT(*) as count FROM diagrams WHERE user_id = ? AND subject = 'Biology'", (user['id'],))
     biology = c.fetchone()['count']
     
-    c.execute("SELECT COUNT(*) as count FROM diagrams WHERE subject = 'Physics'")
+    c.execute("SELECT COUNT(*) as count FROM diagrams WHERE user_id = ? AND subject = 'Physics'", (user['id'],))
     physics = c.fetchone()['count']
     
-    c.execute('SELECT COUNT(*) as total FROM diagrams WHERE mcqs IS NOT NULL AND mcqs != ""')
+    c.execute('SELECT COUNT(*) as total FROM diagrams WHERE user_id = ? AND mcqs IS NOT NULL AND mcqs != ""', (user['id'],))
     questions = c.fetchone()['total']
     
-    c.execute('SELECT * FROM diagrams ORDER BY uploaded_at DESC LIMIT 5')
+    c.execute('SELECT * FROM diagrams WHERE user_id = ? ORDER BY uploaded_at DESC LIMIT 5', (user['id'],))
     recent = c.fetchall()
     
     conn.close()
@@ -345,20 +484,31 @@ def dashboard():
                          recent_uploads=recent)
 
 @app.route('/history')
+@login_required
 def history():
     """History page"""
+    user = get_current_user()
+    if not user:
+        return redirect(url_for('login'))
+    
     conn = get_db()
     c = conn.cursor()
-    c.execute('SELECT * FROM diagrams ORDER BY uploaded_at DESC')
+    c.execute('SELECT * FROM diagrams WHERE user_id = ? ORDER BY uploaded_at DESC', (user['id'],))
     diagrams = c.fetchall()
     conn.close()
     
     return render_template('history.html', diagrams=diagrams)
 
 @app.route('/api/upload', methods=['POST'])
+@login_required
 def upload_diagram():
     """Upload and analyze diagram"""
     try:
+        user = get_current_user()
+        
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
         
@@ -385,12 +535,13 @@ def upload_diagram():
         c = conn.cursor()
         
         c.execute('''INSERT INTO diagrams 
-                    (filename, diagram_name, subject, chapter, analysis, 
+                    (user_id, filename, diagram_name, subject, chapter, analysis, 
                      components, mcqs, assertion_questions, match_questions, 
                      one_word_questions, confusion_points, high_yield_points, 
                      revision_summary, flashcards)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                 (filename,
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                 (user['id'],
+                  filename,
                   analysis_data.get('diagram_name', 'Unknown'),
                   analysis_data.get('subject', 'Not Determined'),
                   analysis_data.get('chapter', 'Not Determined'),
@@ -421,12 +572,17 @@ def upload_diagram():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/diagram/<int:diagram_id>')
+@login_required
 def get_diagram(diagram_id):
     """Get diagram details"""
     try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
         conn = get_db()
         c = conn.cursor()
-        c.execute('SELECT * FROM diagrams WHERE id = ?', (diagram_id,))
+        c.execute('SELECT * FROM diagrams WHERE id = ? AND user_id = ?', (diagram_id, user['id']))
         diagram = c.fetchone()
         conn.close()
         
@@ -456,12 +612,17 @@ def get_diagram(diagram_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/diagram/<int:diagram_id>/export-pdf')
+@login_required
 def export_pdf(diagram_id):
     """Export diagram analysis as PDF"""
     try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
         conn = get_db()
         c = conn.cursor()
-        c.execute('SELECT * FROM diagrams WHERE id = ?', (diagram_id,))
+        c.execute('SELECT * FROM diagrams WHERE id = ? AND user_id = ?', (diagram_id, user['id']))
         diagram = c.fetchone()
         conn.close()
         
@@ -571,22 +732,27 @@ def export_pdf(diagram_id):
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/stats')
+@login_required
 def get_stats():
     """Get statistics"""
     try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
         conn = get_db()
         c = conn.cursor()
         
-        c.execute('SELECT COUNT(*) as total FROM diagrams')
+        c.execute('SELECT COUNT(*) as total FROM diagrams WHERE user_id = ?', (user['id'],))
         total = c.fetchone()['total']
         
-        c.execute("SELECT COUNT(*) as count FROM diagrams WHERE subject = 'Biology'")
+        c.execute("SELECT COUNT(*) as count FROM diagrams WHERE user_id = ? AND subject = 'Biology'", (user['id'],))
         biology = c.fetchone()['count']
         
-        c.execute("SELECT COUNT(*) as count FROM diagrams WHERE subject = 'Physics'")
+        c.execute("SELECT COUNT(*) as count FROM diagrams WHERE user_id = ? AND subject = 'Physics'", (user['id'],))
         physics = c.fetchone()['count']
         
-        c.execute('SELECT COUNT(*) as total FROM diagrams WHERE mcqs IS NOT NULL AND mcqs != ""')
+        c.execute('SELECT COUNT(*) as total FROM diagrams WHERE user_id = ? AND mcqs IS NOT NULL AND mcqs != ""', (user['id'],))
         questions = c.fetchone()['total']
         
         conn.close()
@@ -602,13 +768,18 @@ def get_stats():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/diagram/<int:diagram_id>/delete', methods=['DELETE'])
+@login_required
 def delete_diagram(diagram_id):
     """Delete diagram"""
     try:
+        user = get_current_user()
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
         conn = get_db()
         c = conn.cursor()
         
-        c.execute('SELECT filename FROM diagrams WHERE id = ?', (diagram_id,))
+        c.execute('SELECT filename FROM diagrams WHERE id = ? AND user_id = ?', (diagram_id, user['id']))
         diagram = c.fetchone()
         
         if not diagram:
